@@ -1,30 +1,23 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Signal Bots — Premium</title>
-  <link rel="manifest" href="/manifest.json">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mines Bot</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <img src="icons/icon-192.png" width="48" height="48" alt="logo">
-      <div>
-        <h1>Signal Bots</h1>
-        <div class="subtitle">Премиум сигналы для игр</div>
-      </div>
-    </header>
-
-    <main id="main">
-      <div class="grid" id="menu"></div>
-      <div id="screen"></div>
-    </main>
-
-    <footer>⚡️ Демо-бот. Сигналы — эмуляция. Не гарантируют выигрыш.</footer>
+  <div class="container">
+    <h1 class="title">Mines Bot</h1>
+    <div class="controls">
+      <button id="minus">−</button>
+      <span id="mineCount">3</span> traps
+      <button id="plus">+</button>
+    </div>
+    <div id="grid" class="grid"></div>
+    <button id="signalBtn" class="signal-btn">Получить сигнал</button>
+    <div id="timer" class="timer"></div>
   </div>
-
-<script src="app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

@@ -1,54 +1,73 @@
-(() => {
-  const games = [
-    {id:'mines', title:'Mines', desc:'Подсказка безопасных клеток', icon:'/icons/icon-mines.png'},
-    {id:'aviator', title:'Aviator', desc:'Прогноз коэф. взлёта', icon:'/icons/icon-aviator.png'},
-    {id:'luckyjet', title:'Lucky Jet', desc:'Прогноз коэф. взлёта', icon:'/icons/icon-lucky.png'},
-    {id:'plinko', title:'Plinko', desc:'Прогноз сектора падения', icon:'/icons/icon-plinko.png'},
-    {id:'crash', title:'Crash', desc:'Прогноз множителя', icon:'/icons/icon-crash.png'}
-  ];
+const grid = document.getElementById('grid');
+const mineCountEl = document.getElementById('mineCount');
+const minusBtn = document.getElementById('minus');
+const plusBtn = document.getElementById('plus');
+const signalBtn = document.getElementById('signalBtn');
+const timerEl = document.getElementById('timer');
 
-  const menu = document.getElementById('menu');
-  const screen = document.getElementById('screen');
+let mineCount = 3;
+const gridSize = 5;
 
-  games.forEach(g => {
-    const t = document.createElement('div');
-    t.className='tile';
-    t.innerHTML = `<img src="${g.icon}" alt=""><h3>${g.title}</h3><div class="small">${g.desc}</div>`;
-    t.onclick = ()=>openGame(g.id);
-    menu.appendChild(t);
-  });
-
-  const rand = (n)=>Math.floor(Math.random()*n);
-  const choice = (arr)=>arr[rand(arr.length)];
-
-  function genMines(){ return {cells:choice([3,4,5,6])}; }
-  function genAviator(){ return {mult:(1+Math.random()*10).toFixed(2)}; }
-  function genLuckyJet(){ return {mult:(1+Math.random()*12).toFixed(2)}; }
-  function genPlinko(){ return {bucket:rand(7)+1}; }
-  function genCrash(){ return {cat:choice(['Low','Medium','High']),mult:(1+Math.random()*20).toFixed(2)}; }
-
-  function openGame(id){
-    screen.innerHTML='';
-    const el = document.createElement('div'); el.className='card';
-    const h = document.createElement('h3'); h.innerText=games.find(x=>x.id===id).title; el.appendChild(h);
-    const btn = document.createElement('button'); btn.innerText='Получить сигнал'; el.appendChild(btn);
-    const sigBox = document.createElement('div'); sigBox.className='signal'; el.appendChild(sigBox);
-    const hist = document.createElement('div'); hist.className='history'; el.appendChild(hist);
-
-    function render(){
-      let s;
-      if(id==='mines') s=`Рекомендовано безопасных клеток: ${genMines().cells}`;
-      if(id==='aviator') s=`Прогноз: ${genAviator().mult}x`;
-      if(id==='luckyjet') s=`Lucky Jet: ${genLuckyJet().mult}x`;
-      if(id==='plinko') s=`Plinko бакет: ${genPlinko().bucket}`;
-      if(id==='crash') {let g=genCrash(); s=`Crash: ${g.cat} — ${g.mult}x`;}
-      sigBox.innerText = s;
-      const d = document.createElement('div'); d.innerText=s;
-      hist.prepend(d);
+function renderGrid(mines = []) {
+  grid.innerHTML = '';
+  for (let i = 0; i < gridSize * gridSize; i++) {
+    const cell = document.createElement('div');
+    cell.classList.add('cell');
+    if (mines.length > 0) {
+      cell.classList.add('revealed');
+      if (mines.includes(i)) {
+        cell.classList.add('mine');
+        cell.textContent = '💣';
+      } else {
+        cell.classList.add('safe');
+        cell.textContent = '⭐';
+      }
     }
-
-    btn.onclick = render;
-    screen.appendChild(el);
-    render(); // первый сигнал сразу
+    grid.appendChild(cell);
   }
-})();
+}
+
+function generateMines(count) {
+  const mines = new Set();
+  while (mines.size < count) {
+    mines.add(Math.floor(Math.random() * gridSize * gridSize));
+  }
+  return Array.from(mines);
+}
+
+function startTimer(duration) {
+  let remaining = duration;
+  timerEl.textContent = `⏳ ${remaining} сек`;
+  const interval = setInterval(() => {
+    remaining--;
+    timerEl.textContent = `⏳ ${remaining} сек`;
+    if (remaining <= 0) {
+      clearInterval(interval);
+      timerEl.textContent = '';
+      signalBtn.disabled = false;
+    }
+  }, 1000);
+}
+
+minusBtn.addEventListener('click', () => {
+  if (mineCount > 1) {
+    mineCount--;
+    mineCountEl.textContent = mineCount;
+  }
+});
+plusBtn.addEventListener('click', () => {
+  if (mineCount < gridSize * gridSize - 1) {
+    mineCount++;
+    mineCountEl.textContent = mineCount;
+  }
+});
+
+signalBtn.addEventListener('click', () => {
+  const mines = generateMines(mineCount);
+  renderGrid(mines);
+  signalBtn.disabled = true;
+  startTimer(30);
+});
+
+// initial empty grid
+renderGrid();
